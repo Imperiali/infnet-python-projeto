@@ -151,3 +151,40 @@ while True:
     else:
         print('O usuário Digitou opções invalidas.')
 
+
+class Server:
+    """
+        Classe referente ao lado do servidor
+    """
+
+    def __init__(self):
+        """
+            Ao instanciar a classe, associa o socket na porta e ao endereço
+        """
+        self.info = ''
+        self.socket_client = ''
+        self.endereco_cliente = ''
+        self.socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.endereco = socket.gethostname()
+        self.porta = 9997
+        self.socket_server.bind((self.endereco, self.porta))
+        print('Servidor iniciado')
+
+    def waitConection(self):
+        """
+            Começa a esperar uma conexão de um cliente
+        :return:
+        """
+        print('Esperando conexão do cliente...')
+        self.socket_server.listen()
+        (self.socket_client, self.endereco_cliente) = self.socket_server.accept()
+        print(f'Cliente conectado!: {self.endereco_cliente}')
+
+
+
+
+
+
+
+
+

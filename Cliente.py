@@ -137,3 +137,21 @@ while True:
         break
     else:
         print('Opção Inválida')
+
+
+class Client:
+
+    """
+       Classe responsavel pelo lado do cliente
+   """
+
+    def __init__(self):
+        """
+            Instanciando o cliente, conecta ele ao servidor
+        """
+        self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.endereco = socket.gethostname()
+        self.porta = 9997
+        self.socket_client.connect((self.endereco, self.porta))
+        print('Cliente iniciado')
+
