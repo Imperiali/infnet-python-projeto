@@ -107,7 +107,6 @@ class Server:
     def cpu_info(self):
         """
             Função que armazena as informações da CPU
-        :param socket_cliente:
         :return:
         """
         infos = cpuinfo.get_cpu_info()
@@ -116,7 +115,6 @@ class Server:
     def uso_cpu_ram(self):
         """
             Função que armazena uso de CPU e RAM
-        :param socket_cliente:
         :return:
         """
         lista = []
@@ -129,7 +127,6 @@ class Server:
     def info_disco(self):
         """
             Função que armazena as informações de disco
-        :param socket_cliente:
         :return:
         """
         infodisco = psutil.disk_usage('.')
@@ -138,7 +135,6 @@ class Server:
     def processador_info(self):
         """
             Função que armazena informações do processador
-        :param socket_cliente:
         :return:
         """
         cpu_percent = psutil.cpu_count()
@@ -151,7 +147,6 @@ class Server:
     def diretorios_arquivos(self):
         """
             Função para armazenar arquivos e diretórios
-        :param socket_cliente:
         :return:
         """
         lista = os.listdir()
@@ -175,7 +170,6 @@ class Server:
     def redes_info(self):
         """
             Função que retorna os endereços de rede
-        :param socket_cliente:
         :return:
         """
         interfaces_dic = psutil.net_if_addrs()
@@ -188,10 +182,9 @@ class Server:
     def sair_da_conexao(self):
         """
             Função que encerra a conexão
-        :param socket_cliente:
         :return:
         """
-        info = ('Conexão Encerrada!')
+        info = 'Conexão Encerrada!'
         self.socket_client.send(info.encode('utf-8'))
         print("Fechando Conexão com", str(self.endereco_cliente), "...")
         self.socket_client.shutdown(socket.SHUT_RDWR)
