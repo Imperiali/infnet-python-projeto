@@ -67,10 +67,12 @@ def processos_em_atividade(socket_cliente):  # Função que armazena processos e
 
 
 def redes_info(socket_cliente):  # Função que retorna os endereços de rede
-    interfaces_dic = psutil.net_if_addrs()
-    resposta = pickle.dumps(interfaces_dic)
-    socket_cliente.send(resposta)  # Envia mensagem
-
+    try:
+        interfaces_dic = psutil.net_if_addrs()
+        resposta = pickle.dumps(interfaces_dic)
+        socket_cliente.send(resposta)  # Envia mensagem
+    except Exception as e:
+        socket_cliente.send(e)  # Envia mensagem
 
 def sair_da_conexao(socket_cliente):  # Função que encerra a conexão
     info = ('Conexão Encerrada!')
@@ -100,6 +102,7 @@ host = socket.gethostname()
 porta = 9997
 
 # Associa a porta
+
 socket_servidor.bind((host, porta))
 
 # Escuta a porta
