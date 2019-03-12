@@ -50,10 +50,11 @@ def main():
         msg = server.socket_client.recv(1024)
 
         if '1' == msg.decode('utf-8'):
-            server.uso_cpu_ram()
-            server.cpu_info()
-            server.processador_info()
-            server.info_disco()
+            cpu_ram = server.uso_cpu_ram()
+            cpu_info = server.cpu_info()
+            proc_info = server.processador_info()
+            disc_info = server.info_disco()
+            server.enviar(cpu_ram=cpu_ram, cpu_info=cpu_info, proc_info=proc_info, disc_info=disc_info)
             print('O Usuário Solicitou Informações sobre a Máquina.')
 
         elif '2' == msg.decode('utf-8'):
@@ -110,7 +111,7 @@ class Server:
         :return:
         """
         infos = cpuinfo.get_cpu_info()
-        self.envia_infos(infos)
+        return infos
 
     def uso_cpu_ram(self):
         """
@@ -122,7 +123,7 @@ class Server:
         mem_virtual = psutil.virtual_memory()
         mem_percent = mem_virtual.used / mem_virtual.total
         lista.append(mem_percent)
-        self.envia_infos(lista)
+        return lista
 
     def info_disco(self):
         """
@@ -130,7 +131,7 @@ class Server:
         :return:
         """
         infodisco = psutil.disk_usage('.')
-        self.envia_infos(infodisco)
+        return infodisco
 
     def processador_info(self):
         """
@@ -140,9 +141,10 @@ class Server:
         cpu_percent = psutil.cpu_count()
         frequencia_cpu = psutil.cpu_freq().current
         nucleos = psutil.cpu_count(logical=False)
-        self.envia_infos(cpu_percent)
-        self.envia_infos(frequencia_cpu)
-        self.envia_infos(nucleos)
+        return [cpu_percent, frequencia_cpu, nucleos]
+        # self.envia_infos(cpu_percent)
+        # self.envia_infos(frequencia_cpu)
+        # self.envia_infos(nucleos)
 
     def diretorios_arquivos(self):
         """
@@ -189,6 +191,12 @@ class Server:
         print("Fechando Conexão com", str(self.endereco_cliente), "...")
         self.socket_client.shutdown(socket.SHUT_RDWR)
         self.socket_client.close()
+
+    def enviar(self, **info):
+        envio = {}
+        for nome, valor in info.items():
+            envio[nome] = valor
+        self.envia_infos(envio)
 
     def closeConection(self):
         self.socket_server.close()
