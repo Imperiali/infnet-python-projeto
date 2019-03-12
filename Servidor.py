@@ -142,9 +142,6 @@ class Server:
         frequencia_cpu = psutil.cpu_freq().current
         nucleos = psutil.cpu_count(logical=False)
         return [cpu_percent, frequencia_cpu, nucleos]
-        # self.envia_infos(cpu_percent)
-        # self.envia_infos(frequencia_cpu)
-        # self.envia_infos(nucleos)
 
     def diretorios_arquivos(self):
         """

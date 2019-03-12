@@ -185,6 +185,48 @@ class Client:
 
         print(" % de Disco Usado:", disco.percent, '%')
 
+    def opcao2(self, msg1):
+        self.socket_client.send(msg1.encode('utf-8'))
+        recv = self.socket_client.recv(2048)
+        lista2 = pickle.loads(recv)
+        titulo = '{:11}'.format("Tamanho")
+        titulo = titulo + '{:27}'.format("Data de Modificação")
+        titulo = titulo + '{:27}'.format("Data de Criação")
+        titulo = titulo + "Nome"
+        print(titulo)
+        for i in lista2:
+            kb = lista2[i][0] / 1000
+            tamanho = '{:10}'.format(str('{:.2f}'.format(kb) + ' KB'))
+            print(tamanho, time.ctime(lista2[i][2]), " ", time.ctime(lista2[i][1]), " ", i)
+        time.sleep(1)
+
+    def opcao3(self, msg1):
+        self.socket_client.send(msg1.encode('utf-8'))
+        recv = self.socket_client.recv(1024)
+        dic = pickle.loads(recv)
+        lista = psutil.pids()
+        self.formatar_processos_titulo()
+        for i in lista:
+            self.formatar_processos_texto(i)
+        time.sleep(2)
+
+    def opcao4(self, msg1):
+        self.socket_client.send(msg1.encode('utf-8'))
+        recv = self.socket_client.recv(2048)
+        dic_redes = pickle.loads(recv)
+        self.redes_formatada()
+        ip = dic_redes['Ethernet 4'][1].address
+        netmask = dic_redes['Ethernet 4'][1].netmask
+        mac = dic_redes['Ethernet 4'][0].address
+        print(ip, '      ', netmask, '              ', mac)
+        time.sleep(2)
+
+    def opcao5(self, msg1):
+        self.socket_client.send(msg1.encode('utf-8'))
+        bytes = self.socket_client.recv(1024)
+        self.socket_client.shutdown(socket.SHUT_RDWR)
+        self.socket_client.close()
+
 
 def main():
 
@@ -197,47 +239,17 @@ def main():
         if msg1 == '1':
             cliente.opcao1(msg1)
 
-        elif msg1 == '2':  # Se for 2 faça isso
-            cliente.send(msg1.encode('utf-8'))
-            recv = cliente.recv(2048)
-            lista2 = pickle.loads(recv)
-            titulo = '{:11}'.format("Tamanho")  # 10 caracteres + 1 de espaço
-            # Concatenar com 25 caracteres + 2 de espaços
-            titulo = titulo + '{:27}'.format("Data de Modificação")
-            # Concatenar com 25 caracteres + 2 de espaços
-            titulo = titulo + '{:27}'.format("Data de Criação")
-            titulo = titulo + "Nome"
-            print(titulo)
-            for i in lista2:
-                kb = lista2[i][0] / 1000
-                tamanho = '{:10}'.format(str('{:.2f}'.format(kb) + ' KB'))
-                print(tamanho, time.ctime(lista2[i][2]), " ", time.ctime(lista2[i][1]), " ", i)
-            time.sleep(1)
-        elif msg1 == '3':  # Se for 3 faça isso
-            cliente.send(msg1.encode('utf-8'))
-            recv = cliente.recv(1024)
-            dic = pickle.loads(recv)
-            lista = psutil.pids()
-            formatar_processos_titulo()
-            for i in lista:
-                formatar_processos_texto(i)
-            time.sleep(2)
-        elif msg1 == '4':  # Se for 4 faça isso
-            cliente.send(msg1.encode('utf-8'))
-            recv = cliente.recv(2048)
-            dic_redes = pickle.loads(recv)
-            l = ' '
-            redes_formatada(l)
-            ip = dic_redes['Ethernet 4'][1].address
-            netmask = dic_redes['Ethernet 4'][1].netmask
-            mac = dic_redes['Ethernet 4'][0].address
-            print(ip, '      ', netmask, '              ', mac)
-            time.sleep(2)
-        elif msg1 == '5':  # Se for 5 faça isso
-            cliente.send(msg1.encode('utf-8'))
-            bytes = cliente.recv(1024)
-            cliente.shutdown(socket.SHUT_RDWR)
-            cliente.close()
+        elif msg1 == '2':
+            cliente.opcao2(msg1)
+
+        elif msg1 == '3':
+            cliente.opcao3(msg1)
+
+        elif msg1 == '4':
+            cliente.opcao4(msg1)
+
+        elif msg1 == '5':
+            cliente.opcao5(msg1)
             break
         else:
             print('Opção Inválida')
