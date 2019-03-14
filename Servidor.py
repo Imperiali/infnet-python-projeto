@@ -4,153 +4,200 @@ import pickle
 import psutil
 import socket
 
-#region Metodos
 
-# Definição das Funções
-def cpu_info(socket_cliente):  # Função que armazena as informações da CPU
-    infos = cpuinfo.get_cpu_info()
-    dados_enviados = pickle.dumps(infos)
-    socket_cliente.send(dados_enviados)
+# region Metodos
 
 
-def uso_cpu_ram(socket_cliente):  # Função que armazena uso de CPU e RAM
-    # Gera a lista de resposta
-    lista = []
-    lista.append(psutil.cpu_percent())
-    mem_virtual = psutil.virtual_memory()
-    mem_percent = mem_virtual.used / mem_virtual.total
-    lista.append(mem_percent)
-    # Prepara a lista para o envio
-    bytes_resposta = pickle.dumps(lista)
-    # Envia os dados
-    socket_cliente.send(bytes_resposta)  # Envia mensagem
+# endregion
+
+# # Cria o socket
+# socket_servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#
+# # pega o nome da máquina
+# host = socket.gethostname()
+# porta = 9997
+#
+# # Associa a porta
+# socket_servidor.bind((host, porta))
+#
+# # Escuta a porta
+# socket_servidor.listen()
+# print("Servidor", host, "esperando conexão na porta", porta)
+#
+# # Aceita a conexão
+# (socket_cliente, addr) = socket_servidor.accept()
+# print("Conectado a:", str(addr))
+
+# # Declaração do Menu
+# info = ("\n ***********************MENU******************************"
+#         "\n *************1 - Informações da Máquina *****************"
+#         "\n *************2- Informações de Arquivos *****************"
+#         "\n *************3- Informações Processos Ativos ************"
+#         "\n *************4 -Informações de Redes ********************"
+#         "\n *************5- Sair ************************************"
+#         "\n *********************************************************")
+# socket_cliente.send(info.encode('utf-8'))  # Envia resposta
 
 
-def info_disco(socket_cliente):  # Função que armazena as informações de disco
-    infodisco = psutil.disk_usage('.')
-    dadosenviados = pickle.dumps(infodisco)
-    socket_cliente.send(dadosenviados)
+def main():
+    """
+        Metodo para fazer toda a aplicação rodar
+    :return:
+    """
+    server = Server()
+    server.waitConection()
+    while True:
+        msg = server.socket_client.recv(1024)
+
+        if '1' == msg.decode('utf-8'):
+            cpu_ram = server.uso_cpu_ram()
+            cpu_info = server.cpu_info()
+            proc_info = server.processador_info()
+            disc_info = server.info_disco()
+            server.enviar(cpu_ram=cpu_ram, cpu_info=cpu_info, proc_info=proc_info, disc_info=disc_info)
+            print('O Usuário Solicitou Informações sobre a Máquina.')
+
+        elif '2' == msg.decode('utf-8'):
+            server.diretorios_arquivos()
+            print('O Usuário Solicitou Informações sobre Arquivos.')
+
+        elif '3' == msg.decode('utf-8'):
+            server.processos_em_atividade()
+            print('O usuário solicitou informações sobre processos.')
+
+        elif '4' == msg.decode('utf-8'):
+            server.redes_info()
+            print('O Usuário solicitou informações de redes')
+
+        elif '5' == msg.decode('utf-8'):
+            server.sair_da_conexao()
+            break
+
+        else:
+            print('O usuário Digitou opções invalidas.')
 
 
-def processador_info(socket_cliente):  # Função que armazena informações do processador
-    cpu_percent = psutil.cpu_count()  # % de cpu por núcleos
-    frequencia_cpu = psutil.cpu_freq().current  # frequencia total
-    nucleos = psutil.cpu_count(logical=False)  # nº de núcleos e Threads
-    dados_cpu_percent = pickle.dumps(cpu_percent)
-    dados_frequencia_cpu = pickle.dumps(frequencia_cpu)
-    dados_nucleos = pickle.dumps(nucleos)
-    socket_cliente.send(dados_cpu_percent)
-    socket_cliente.send(dados_frequencia_cpu)
-    socket_cliente.send(dados_nucleos)
+class Server:
+    """
+        Classe referente ao lado do servidor
+    """
 
+    def __init__(self):
+        """
+            Ao instanciar a classe, associa o socket na porta e ao endereço
+        """
+        self.info = ''
+        self.socket_client = ''
+        self.endereco_cliente = ''
+        self.socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.endereco = socket.gethostname()
+        self.porta = 9997
+        self.socket_server.bind((self.endereco, self.porta))
+        print('Servidor iniciado')
 
-def diretorios_arquivos(socket_cliente):  # Função para armazenar arquivos e diretórios
-    # obtém lista de arquivos e diretórios
-    lista = os.listdir()
-    # Cria um dicionário
-    dic = {}
-    for i in lista:  # varia na lista dos arquivos e diretórios
-        if os.path.isfile(i):  # checa se é um arquivo
-            dic[i] = []
-            dic[i].append(os.stat(i).st_size)  # tamanho
-            dic[i].append(os.stat(i).st_atime)  # tempo de criação
-            dic[i].append(os.stat(i).st_mtime)  # Tempo de Modificação
-    resposta = pickle.dumps(dic)
-    # Envia os dados
-    socket_cliente.send(resposta)  # Envia mensagem
+    def waitConection(self):
+        """
+            Começa a esperar uma conexão de um cliente
+        :return:
+        """
+        print('Esperando conexão do cliente...')
+        self.socket_server.listen()
+        (self.socket_client, self.endereco_cliente) = self.socket_server.accept()
+        print(f'Cliente conectado!: {self.endereco_cliente}')
 
+    def cpu_info(self):
+        """
+            Função que armazena as informações da CPU
+        :return:
+        """
+        infos = cpuinfo.get_cpu_info()
+        return infos
 
-def processos_em_atividade(socket_cliente):  # Função que armazena processos em atividades na máquina
-    dic = psutil.pids()
-    resposta = pickle.dumps(dic)
-    socket_cliente.send(resposta)  # Envia mensagem
+    def uso_cpu_ram(self):
+        """
+            Função que armazena uso de CPU e RAM
+        :return:
+        """
+        lista = []
+        lista.append(psutil.cpu_percent())
+        mem_virtual = psutil.virtual_memory()
+        mem_percent = mem_virtual.used / mem_virtual.total
+        lista.append(mem_percent)
+        return lista
 
+    def info_disco(self):
+        """
+            Função que armazena as informações de disco
+        :return:
+        """
+        infodisco = psutil.disk_usage('.')
+        return infodisco
 
-def redes_info(socket_cliente):  # Função que retorna os endereços de rede
-    try:
+    def processador_info(self):
+        """
+            Função que armazena informações do processador
+        :return:
+        """
+        cpu_percent = psutil.cpu_count()
+        frequencia_cpu = psutil.cpu_freq().current
+        nucleos = psutil.cpu_count(logical=False)
+        return [cpu_percent, frequencia_cpu, nucleos]
+
+    def diretorios_arquivos(self):
+        """
+            Função para armazenar arquivos e diretórios
+        :return:
+        """
+        lista = os.listdir()
+        dic = {}
+        for i in lista:
+            if os.path.isfile(i):
+                dic[i] = []
+                dic[i].append(os.stat(i).st_size)
+                dic[i].append(os.stat(i).st_atime)
+                dic[i].append(os.stat(i).st_mtime)
+        self.envia_infos(dic)
+
+    def processos_em_atividade(self):
+        """
+            Função que armazena processos em atividades na máquina
+        :return:
+        """
+        dic = psutil.pids()
+        self.envia_infos(dic)
+
+    def redes_info(self):
+        """
+            Função que retorna os endereços de rede
+        :return:
+        """
         interfaces_dic = psutil.net_if_addrs()
-        resposta = pickle.dumps(interfaces_dic)
-        socket_cliente.send(resposta)  # Envia mensagem
-    except Exception as e:
-        socket_cliente.send(e)  # Envia mensagem
+        self.envia_infos(interfaces_dic)
 
-def sair_da_conexao(socket_cliente):  # Função que encerra a conexão
-    info = ('Conexão Encerrada!')
-    socket_cliente.send(info.encode('utf-8'))
-    print("Fechando Conexão com", str(addr), "...")
-    socket_cliente.shutdown(socket.SHUT_RDWR)
-    socket_cliente.close()
+    def envia_infos(self, info):
+        resposta = pickle.dumps(info)
+        self.socket_client.send(resposta)
 
-#endregion
+    def sair_da_conexao(self):
+        """
+            Função que encerra a conexão
+        :return:
+        """
+        info = 'Conexão Encerrada!'
+        self.socket_client.send(info.encode('utf-8'))
+        print("Fechando Conexão com", str(self.endereco_cliente), "...")
+        self.socket_client.shutdown(socket.SHUT_RDWR)
+        self.socket_client.close()
 
-projetoDeBloco = ("\n ██▓███   ██▀███   ▒█████   ▄▄▄██▀▀▀▓█████▄▄▄█████▓ ▒█████     ▓█████▄ ▓█████     ▄▄▄▄    ██▓     ▒█████   ▄████▄   ▒█████  "
-      "\n▓██░  ██▒▓██ ▒ ██▒▒██▒  ██▒   ▒██   ▓█   ▀▓  ██▒ ▓▒▒██▒  ██▒   ▒██▀ ██▌▓█   ▀    ▓█████▄ ▓██▒    ▒██▒  ██▒▒██▀ ▀█  ▒██▒  ██▒"
-      "\n▓██░ ██▓▒▓██ ░▄█ ▒▒██░  ██▒   ░██   ▒███  ▒ ▓██░ ▒░▒██░  ██▒   ░██   █▌▒███      ▒██▒ ▄██▒██░    ▒██░  ██▒▒▓█    ▄ ▒██░  ██▒"
-        "\n▒██▄█▓▒ ▒▒██▀▀█▄  ▒██   ██░▓██▄██▓  ▒▓█  ▄░ ▓██▓ ░ ▒██   ██░   ░▓█▄   ▌▒▓█  ▄    ▒██░█▀  ▒██░    ▒██   ██░▒▓▓▄ ▄██▒▒██   ██░"
-        "\n▒██▒ ░  ░░██▓ ▒██▒░ ████▓▒░ ▓███▒   ░▒████▒ ▒██▒ ░ ░ ████▓▒░   ░▒████▓ ░▒████▒   ░▓█  ▀█▓░██████▒░ ████▓▒░▒ ▓███▀ ░░ ████▓▒░"
-        "\n▒▓▒░ ░  ░░ ▒▓ ░▒▓░░ ▒░▒░▒░  ▒▓▒▒░   ░░ ▒░ ░ ▒ ░░   ░ ▒░▒░▒░     ▒▒▓  ▒ ░░ ▒░ ░   ░▒▓███▀▒░ ▒░▓  ░░ ▒░▒░▒░ ░ ░▒ ▒  ░░ ▒░▒░▒░ "
-        "\n░▒ ░       ░▒ ░ ▒░  ░ ▒ ▒░  ▒ ░▒░    ░ ░  ░   ░      ░ ▒ ▒░     ░ ▒  ▒  ░ ░  ░   ▒░▒   ░ ░ ░ ▒  ░  ░ ▒ ▒░   ░  ▒     ░ ▒ ▒░ "
-        "\n░░         ░░   ░ ░ ░ ░ ▒   ░ ░ ░      ░    ░      ░ ░ ░ ▒      ░ ░  ░    ░       ░    ░   ░ ░   ░ ░ ░ ▒  ░        ░ ░ ░ ▒  "
-                    "\n░         ░ ░   ░   ░      ░  ░            ░ ░        ░       ░  ░    ░          ░  ░    ░ ░  ░ ░          ░ ░  "
-                                                                        "\n░                      ░                  ░                 ")
+    def enviar(self, **info):
+        envio = {}
+        for nome, valor in info.items():
+            envio[nome] = valor
+        self.envia_infos(envio)
 
-# Cria o socket
-socket_servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# pega o nome da máquina
-host = socket.gethostname()
-porta = 9997
-
-# Associa a porta
-
-socket_servidor.bind((host, porta))
-
-# Escuta a porta
-socket_servidor.listen()
-print("Servidor", host, "esperando conexão na porta", porta)
-
-# Aceita a conexão
-(socket_cliente, addr) = socket_servidor.accept()
-print("Conectado a:", str(addr))
-
-# Declaração do Menu
-info = ("\n ***********************MENU******************************"
-        "\n *************1 - Informações da Máquina *****************"
-        "\n *************2- Informações de Arquivos *****************"
-        "\n *************3- Informações Processos Ativos ************"
-        "\n *************4 -Informações de Redes ********************"
-        "\n *************5- Sair ************************************"
-        "\n *********************************************************")
-socket_cliente.send(info.encode('utf-8'))  # Envia resposta
+    def closeConection(self):
+        self.socket_server.close()
 
 
-while True:
-    # Decodifica mensagem em UTF-8:
-    msg = socket_cliente.recv(1024)
-
-    if '1' == msg.decode('utf-8'):  # se for 1 executar isso
-        uso_cpu_ram(socket_cliente)
-        cpu_info(socket_cliente)
-        processador_info(socket_cliente)
-        info_disco(socket_cliente)
-        print('O Usuário Solicitou Informações sobre a Máquina.')
-
-    elif '2' == msg.decode('utf-8'):  # se for 2 executar isso
-        diretorios_arquivos(socket_cliente)
-        print('O Usuário Solicitou Informações sobre Arquivos.')
-
-    elif '3' == msg.decode('utf-8'):  # se for 3 executar isso
-        processos_em_atividade(socket_cliente)
-        print('O usuário solicitou informações sobre processos.')
-
-    elif '4' == msg.decode('utf-8'):  # se for 4 executar isso
-        redes_info(socket_cliente)
-        print('O Usuário solicitou informações de redes')
-
-    elif '5' == msg.decode('utf-8'):  # se for 5 executar isso
-        sair_da_conexao(socket_cliente)
-        break
-
-    else:
-        print('O usuário Digitou opções invalidas.')
-
+if __name__ == '__main__':
+    main()
