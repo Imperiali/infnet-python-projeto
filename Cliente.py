@@ -94,7 +94,6 @@ class Client:
         recv = self.socket_client.recv(2048)
 
         lista = pickle.loads(recv)
-
         self.formatar_cpu_mem(lista['cpu_ram'])
 
         load = lista['cpu_info']
@@ -107,9 +106,12 @@ class Client:
 
         print('Núcleos Lógicos:', nucleos[0])
 
-        print('Frequência:', nucleos[1])
+        print('%CPU por Núcleo', nucleos[1])
 
-        print('Núcleos Físicos:', nucleos[2])
+        print('Frequência:', nucleos[2])
+
+        print('Núcleos Físicos:', nucleos[3])
+
 
         disco = lista['disc_info']
 
