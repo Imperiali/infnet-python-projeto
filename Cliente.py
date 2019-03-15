@@ -89,12 +89,16 @@ class Client:
     def opcao1(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
         msg = ' '
-        print('{:>8}'.format('%CPU') + '{:>8}'.format('%MEM'))
+        # print('{:>8}'.format('%CPU') + '{:>8}'.format('%MEM'))
+
 
         recv = self.socket_client.recv(2048)
 
         lista = pickle.loads(recv)
-        self.formatar_cpu_mem(lista['cpu_ram'])
+
+        print('%CPU:', lista['cpu_ram'][0])
+        print('%MEM:', lista['cpu_ram'][1])
+        # self.formatar_cpu_mem(lista['cpu_ram'])
 
         load = lista['cpu_info']
 
