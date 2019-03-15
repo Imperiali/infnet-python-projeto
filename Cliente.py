@@ -215,9 +215,16 @@ class Client:
         recv = self.socket_client.recv(2048)
         dic_redes = pickle.loads(recv)
         self.redes_formatada()
-        ip = dic_redes['Ethernet 4'][1].address
-        netmask = dic_redes['Ethernet 4'][1].netmask
-        mac = dic_redes['Ethernet 4'][0].address
+
+        ethernet = []
+
+        for key in dic_redes:
+            if key.startswith('Ethernet'):
+                ethernet.append(key)
+
+        ip = dic_redes[ethernet[0]][1].address
+        netmask = dic_redes[ethernet[0]][1].netmask
+        mac = dic_redes[ethernet[0]][0].address
         print(ip, '      ', netmask, '              ', mac)
         time.sleep(2)
 
