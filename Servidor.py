@@ -139,9 +139,10 @@ class Server:
         :return:
         """
         cpu_percent = psutil.cpu_count()
+        cpu_percent_per_core = psutil.cpu_percent(interval=None, percpu=True)
         frequencia_cpu = psutil.cpu_freq().current
         nucleos = psutil.cpu_count(logical=False)
-        return [cpu_percent, frequencia_cpu, nucleos]
+        return [cpu_percent,cpu_percent_per_core, frequencia_cpu, nucleos]
 
     def diretorios_arquivos(self):
         """
