@@ -198,6 +198,12 @@ class Server:
         self.envia_infos(envio)
 
     def sub_rede(self, info):
+
+        '''
+            Função que varre a subrede do ip escolhido e procura por todas as máquinas conectadas e descobríveis na sub rede
+        :param info: ip digitado pelo cliente
+        :return: Retorna os ips da subrede nas quais existem máquinas que respondem ao ping
+        '''
         def retorna_codigo_ping(hostname):
             """Usa o utilitario ping do sistema operacional para encontrar   o host. ('-c 5') indica, em sistemas linux, que deve mandar 5   pacotes. ('-W 3') indica, em sistemas linux, que deve esperar 3   milisegundos por uma resposta. Esta funcao retorna o codigo de   resposta do ping """
 
@@ -228,6 +234,8 @@ class Server:
 
             return host_validos
         return verifica_hosts(info)
+
+
     def closeConection(self):
         self.socket_server.close()
 
