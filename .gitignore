@@ -105,3 +105,5 @@ venv.bak/
 
 #testes
 test.py
+
+.idea/
