@@ -6,6 +6,7 @@ import socket
 import subprocess
 import platform
 import nmap
+import pprint
 
 
 def main():
@@ -41,6 +42,7 @@ def main():
         elif '5' == msg.decode('utf-8'):
             print('O Usuário solicitou verificação de hosts de determinado IP.')
             server.sub_rede()
+            print('Processo de sub rede finalizado')
 
         elif '6' == msg.decode('utf-8'):
             server.sair_da_conexao()
@@ -175,6 +177,8 @@ class Server:
         rick = pickle.loads(info)
         ip = rick['ip']
 
+        print('rickIP',ip )
+        print('porta', rick['portas'])
         """
             Função que varre a subrede do ip escolhido e procura por todas as máquinas conectadas e descobríveis na sub rede
         :param info: ip digitado pelo cliente
@@ -227,19 +231,24 @@ class Server:
 
             nm.scan(host)
             print(nm[host].hostname())
-            lport = []
-            for proto in nm[host].all_protocols():
-                lport.append(nm[host][proto].keys())
+            port =[]
 
-            return lport
+            print('nmhost')
+            pprint.pprint(nm[host])
+            for proto in nm[host]['tcp']:
+
+                port.append(proto)
+            return port
 
         final = verifica_hosts(ip)
-
+        print('final', final)
         subredes = {}
 
         if rick['portas']:
             for ip in final:
                 subredes[ip] = verifica_portas(ip)
+
+            print('subrede',subredes)
             self.envia_infos(subredes)
         else:
             self.envia_infos(final)

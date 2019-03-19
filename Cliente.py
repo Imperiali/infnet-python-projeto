@@ -201,7 +201,7 @@ class Client:
         sub_net = pickle.loads(recv)
 
         print("O teste será feito na sub rede: ", info)
-        print('\n Os host válidos são:')
+        print('\n Os host válidos e suas portas abertas são:')
         pprint.pprint(sub_net)
 
     def opcao6(self, msg1):
