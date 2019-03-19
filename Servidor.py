@@ -71,6 +71,15 @@ def main():
             print('O Usuário solicitou informações de redes')
 
         elif '5' == msg.decode('utf-8'):
+            info = server.socket_client.recv(1000000000)
+            print(info)
+
+            info_complete = pickle.loads(info)
+            print(info_complete)
+            server.sub_rede(info_complete)
+            print('O Usuário solicitou verificação de hosts de determinado IP.')
+
+        elif '6' == msg.decode('utf-8'):
             server.sair_da_conexao()
             break
 
@@ -233,7 +242,9 @@ class Server:
             print("\nMapping ready...")
 
             return host_validos
-        return verifica_hosts(info)
+
+        ip_usavel = pickle.loads(info)
+        self.envia_infos(verifica_hosts(ip_usavel))
 
 
     def closeConection(self):

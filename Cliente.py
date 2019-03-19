@@ -20,7 +20,8 @@ info = ("\n -----------------------MENU------------------------------"
         "\n 2 - Informações de Arquivos "
         "\n 3 - Informações Processos Ativos "
         "\n 4 - Informações de Redes "
-        "\n 5 - Sair "
+        "\n 5 - Sub Rede "
+        "\n 6 - Sair "
         "\n ---------------------------------------------------------")
 
 
@@ -166,6 +167,19 @@ class Client:
 
     def opcao5(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
+        ip_complete = input('Digite o Ip para verificar as portas: ')
+        info_incomplete = ip_complete.split('.')
+        info = ".".join(info_incomplete[0:3]) + '.'
+        print(info)
+        info_complete = pickle.dumps(info)
+        self.socket_client.send(info_complete.encode('utf-8'))
+        recv = self.socket_client.recv(100000)
+
+        print("O teste será feito na sub rede: ", info)
+        print("Os host válidos são: ", recv)
+
+    def opcao6(self, msg1):
+        self.socket_client.send(msg1.encode('utf-8'))
         bytes = self.socket_client.recv(1024)
         self.socket_client.shutdown(socket.SHUT_RDWR)
         self.socket_client.close()
@@ -193,6 +207,9 @@ def main():
 
         elif msg1 == '5':
             cliente.opcao5(msg1)
+
+        elif msg1 == '6':
+            cliente.opcao6(msg1)
             break
         else:
             print('Opção Inválida')
