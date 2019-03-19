@@ -172,11 +172,14 @@ class Client:
         info = ".".join(info_incomplete[0:3]) + '.'
         print(info)
         info_complete = pickle.dumps(info)
-        self.socket_client.send(info_complete.encode('utf-8'))
+        self.socket_client.send(info_complete)
         recv = self.socket_client.recv(100000)
+        print('recv', recv)
+        fuck = pickle.loads(recv)
+        print('fuck', fuck)
 
         print("O teste será feito na sub rede: ", info)
-        print("Os host válidos são: ", recv)
+        print("Os host válidos são: ", fuck)
 
     def opcao6(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
