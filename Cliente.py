@@ -169,19 +169,39 @@ class Client:
     def opcao5(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
         ip_complete = input('Digite o Ip para verificar as portas: ')
+
+        portasInput = input('Deseja verificar as portas?[S/n]')
+
+        ipPortas = {}
+
+        while True:
+
+            if portasInput.lower() == 's' or portasInput == '':
+                ipPortas['portas'] = True
+                break
+            elif portasInput.lower() == 'n':
+                ipPortas['portas'] = False
+                break
+            else:
+                print('Por favor, digite S ou N')
+                portasInput = input('Deseja verificar as portas?[S/n]')
+
+        print('Por favor, aguarde')
         info_incomplete = ip_complete.split('.')
         info = ".".join(info_incomplete[0:3]) + '.'
-        print(info)
-        info_complete = pickle.dumps(info)
+
+        # LOADING ...
+        ipPortas['ip'] = info
+
+        info_complete = pickle.dumps(ipPortas)
         self.socket_client.send(info_complete)
 
         recv = self.socket_client.recv(100000000)
 
-        sub_net = pickle.loads(recv, fix_imports=False)
-        print('fuck', sub_net)
+        sub_net = pickle.loads(recv)
 
         print("O teste será feito na sub rede: ", info)
-        print('\n Os host válidos são:')
+        print('\n Os host válidos e suas portas abertas são:')
         pprint.pprint(sub_net)
 
     def opcao6(self, msg1):
