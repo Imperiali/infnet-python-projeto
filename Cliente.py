@@ -2,6 +2,7 @@ import pickle
 import psutil
 import socket
 import time
+import pprint
 
 
 msgInicial = ("\n ██▓███   ██▀███   ▒█████   ▄▄▄██▀▀▀▓█████▄▄▄█████▓ ▒█████     ▓█████▄ ▓█████     ▄▄▄▄    ██▓     ▒█████   ▄████▄   ▒█████  "
@@ -173,13 +174,15 @@ class Client:
         print(info)
         info_complete = pickle.dumps(info)
         self.socket_client.send(info_complete)
-        recv = self.socket_client.recv(100000)
-        print('recv', recv)
-        fuck = pickle.loads(recv)
-        print('fuck', fuck)
+
+        recv = self.socket_client.recv(100000000)
+
+        sub_net = pickle.loads(recv, fix_imports=False)
+        print('fuck', sub_net)
 
         print("O teste será feito na sub rede: ", info)
-        print("Os host válidos são: ", fuck)
+        print('\n Os host válidos são:')
+        pprint.pprint(sub_net)
 
     def opcao6(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))

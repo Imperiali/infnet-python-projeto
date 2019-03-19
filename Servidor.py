@@ -247,8 +247,8 @@ class Server:
         print('ipusavel', ip_usavel)
         final = verifica_hosts(ip_usavel)
         print('final', final)
-        sub_net = pickle.dumps(final)
-        self.envia_infos(sub_net)
+
+        self.envia_infos(final)
 
 
     def closeConection(self):
