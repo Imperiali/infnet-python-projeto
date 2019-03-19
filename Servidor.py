@@ -208,25 +208,40 @@ class Server:
             :return:
             """
 
+            print("Mapeando\r")
             host_validos = []
             return_codes = dict()
             for i in range(1, 255):
 
                 return_codes[base_ip + '{0}'.format(i)] = retorna_codigo_ping(base_ip + '{0}'.format(i))
                 if i % 20 == 0:
-                    pass
+                    print(".", end="")
                 if return_codes[base_ip + '{0}'.format(i)] == 0:
                     host_validos.append(base_ip + '{0}'.format(i))
 
             return host_validos
 
-        def verifica_portas():
-            pass
+        def verifica_portas(host):
+
+            nm = nmap.PortScanner()
+
+            nm.scan(host)
+            print(nm[host].hostname())
+            lport = []
+            for proto in nm[host].all_protocols():
+                lport.append(nm[host][proto].keys())
+
+            return lport
+
+        final = verifica_hosts(ip)
+
+        subredes = {}
 
         if rick['portas']:
-            pass
+            for ip in final:
+                subredes[ip] = verifica_portas(ip)
+            self.envia_infos(subredes)
         else:
-            final = verifica_hosts(ip)
             self.envia_infos(final)
 
     def closeConection(self):

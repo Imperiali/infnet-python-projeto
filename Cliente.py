@@ -186,6 +186,7 @@ class Client:
                 print('Por favor, digite S ou N')
                 portasInput = input('Deseja verificar as portas?[S/n]')
 
+        print('Por favor, aguarde')
         info_incomplete = ip_complete.split('.')
         info = ".".join(info_incomplete[0:3]) + '.'
 
