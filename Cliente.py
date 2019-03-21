@@ -1,8 +1,10 @@
+#Membros:
+#Lucas Lange Barrozo
+#Igor Imperiali
 import pickle
 import psutil
 import socket
 import time
-import pprint
 
 
 msgInicial = ("\n ██▓███   ██▀███   ▒█████   ▄▄▄██▀▀▀▓█████▄▄▄█████▓ ▒█████     ▓█████▄ ▓█████     ▄▄▄▄    ██▓     ▒█████   ▄████▄   ▒█████  "

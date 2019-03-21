@@ -1,3 +1,6 @@
+#Membros:
+#Lucas Lange Barrozo
+#Igor Imperiali
 import cpuinfo
 import os
 import pickle
@@ -6,7 +9,6 @@ import socket
 import subprocess
 import platform
 import nmap
-import pprint
 
 
 def main():
