@@ -3,40 +3,10 @@ import os
 import pickle
 import psutil
 import socket
-
-
-# region Metodos
-
-
-# endregion
-
-# # Cria o socket
-# socket_servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#
-# # pega o nome da máquina
-# host = socket.gethostname()
-# porta = 9997
-#
-# # Associa a porta
-# socket_servidor.bind((host, porta))
-#
-# # Escuta a porta
-# socket_servidor.listen()
-# print("Servidor", host, "esperando conexão na porta", porta)
-#
-# # Aceita a conexão
-# (socket_cliente, addr) = socket_servidor.accept()
-# print("Conectado a:", str(addr))
-
-# # Declaração do Menu
-# info = ("\n ***********************MENU******************************"
-#         "\n *************1 - Informações da Máquina *****************"
-#         "\n *************2- Informações de Arquivos *****************"
-#         "\n *************3- Informações Processos Ativos ************"
-#         "\n *************4 -Informações de Redes ********************"
-#         "\n *************5- Sair ************************************"
-#         "\n *********************************************************")
-# socket_cliente.send(info.encode('utf-8'))  # Envia resposta
+import subprocess
+import platform
+import nmap
+import pprint
 
 
 def main():
@@ -50,26 +20,31 @@ def main():
         msg = server.socket_client.recv(1024)
 
         if '1' == msg.decode('utf-8'):
+            print('O Usuário Solicitou Informações sobre a Máquina.')
             cpu_ram = server.uso_cpu_ram()
             cpu_info = server.cpu_info()
             proc_info = server.processador_info()
             disc_info = server.info_disco()
             server.enviar(cpu_ram=cpu_ram, cpu_info=cpu_info, proc_info=proc_info, disc_info=disc_info)
-            print('O Usuário Solicitou Informações sobre a Máquina.')
 
         elif '2' == msg.decode('utf-8'):
-            server.diretorios_arquivos()
             print('O Usuário Solicitou Informações sobre Arquivos.')
+            server.diretorios_arquivos()
 
         elif '3' == msg.decode('utf-8'):
-            server.processos_em_atividade()
             print('O usuário solicitou informações sobre processos.')
+            server.processos_em_atividade()
 
         elif '4' == msg.decode('utf-8'):
-            server.redes_info()
             print('O Usuário solicitou informações de redes')
+            server.redes_info()
 
         elif '5' == msg.decode('utf-8'):
+            print('O Usuário solicitou verificação de hosts de determinado IP.')
+            server.sub_rede()
+            print('Processo de sub rede finalizado')
+
+        elif '6' == msg.decode('utf-8'):
             server.sair_da_conexao()
             break
 
@@ -195,6 +170,88 @@ class Server:
         for nome, valor in info.items():
             envio[nome] = valor
         self.envia_infos(envio)
+
+    def sub_rede(self):
+
+        info = self.socket_client.recv(100000000)
+        rick = pickle.loads(info)
+        ip = rick['ip']
+
+        print('rickIP',ip )
+        print('porta', rick['portas'])
+        """
+            Função que varre a subrede do ip escolhido e procura por todas as máquinas conectadas e descobríveis na sub rede
+        :param info: ip digitado pelo cliente
+        :return: Retorna os ips da subrede nas quais existem máquinas que respondem ao ping
+        """
+        def retorna_codigo_ping(hostname):
+            """
+                Usa o utilitario ping do sistema operacional para encontrar   o host. ('-c 5') indica, em sistemas linux,
+            que deve mandar 5   pacotes. ('-W 3') indica, em sistemas linux, que deve esperar 3   milisegundos por uma
+            resposta. Esta funcao retorna o codigo de   resposta do ping
+            :param hostname:
+            :return:
+            """
+
+            plataforma = platform.system()
+            args = []
+            if plataforma == "Windows":
+                args = ["ping", "-n", "1", "-l", "1", "-w", "100", hostname]
+
+            else:
+                args = ['ping', '-c', '1', '-W', '1', hostname]
+
+            ret_cod = subprocess.call(args, stdout=open(os.devnull, 'w'), stderr=open(os.devnull, 'w'))
+            return ret_cod
+
+        def verifica_hosts(base_ip):
+            """
+                Verifica todos os host com a base_ip entre 1 e 255 retorna uma lista com todos os host que tiveram
+            resposta 0 (ativo)
+            :param base_ip:
+            :return:
+            """
+
+            print("Mapeando\r")
+            host_validos = []
+            return_codes = dict()
+            for i in range(1, 255):
+
+                return_codes[base_ip + '{0}'.format(i)] = retorna_codigo_ping(base_ip + '{0}'.format(i))
+                if i % 20 == 0:
+                    print(".", end="")
+                if return_codes[base_ip + '{0}'.format(i)] == 0:
+                    host_validos.append(base_ip + '{0}'.format(i))
+
+            return host_validos
+
+        def verifica_portas(host):
+
+            nm = nmap.PortScanner()
+
+            nm.scan(host)
+            print(nm[host].hostname())
+            port =[]
+
+            print('nmhost')
+            pprint.pprint(nm[host])
+            for proto in nm[host]['tcp']:
+
+                port.append(proto)
+            return port
+
+        final = verifica_hosts(ip)
+        print('final', final)
+        subredes = {}
+
+        if rick['portas']:
+            for ip in final:
+                subredes[ip] = verifica_portas(ip)
+
+            print('subrede',subredes)
+            self.envia_infos(subredes)
+        else:
+            self.envia_infos(final)
 
     def closeConection(self):
         self.socket_server.close()
