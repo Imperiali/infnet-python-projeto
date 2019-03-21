@@ -174,11 +174,9 @@ class Server:
     def sub_rede(self):
 
         info = self.socket_client.recv(100000000)
-        rick = pickle.loads(info)
-        ip = rick['ip']
+        ip_portas = pickle.loads(info)
+        ip = ip_portas['ip']
 
-        print('rickIP',ip )
-        print('porta', rick['portas'])
         """
             Função que varre a subrede do ip escolhido e procura por todas as máquinas conectadas e descobríveis na sub rede
         :param info: ip digitado pelo cliente
@@ -229,36 +227,25 @@ class Server:
 
             nm = nmap.PortScanner()
             port = []
-
+            print('.', end='')
             try:
                 nm.scan(host)
-                print('verifica_portas',nm[host].hostname())
-
-
-                print('nmhost')
-                pprint.pprint(nm[host])
-
-
 
                 for proto in nm[host]['tcp']:
-
 
                     port.append(proto)
             except:
 
-                print('Esse host não tem porta aberta')
+                print('.', end='')
             return port
 
         final = verifica_hosts(ip)
-        print('final', final)
         subredes = {}
 
-        if rick['portas']:
+        if ip_portas['portas']:
             for ip in final:
                 subredes[ip] = verifica_portas(ip)
-                print('subrede parcial')
-                pprint.pprint(subredes)
-            print('subrede',subredes)
+                print('.', end='')
             self.envia_infos(subredes)
         else:
             self.envia_infos(final)

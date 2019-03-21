@@ -168,7 +168,7 @@ class Client:
 
     def opcao5(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
-        ip_complete = input('Digite o Ip para verificar as portas: ')
+        ip_complete = input('Digite o Ip para verificar a sub-rede: ')
 
         portasInput = input('Deseja verificar as portas?[S/n]')
 
@@ -202,13 +202,20 @@ class Client:
 
         print("O teste será feito na sub rede: ", info)
 
-        for hosts, ports in sub_net.items():
 
-            if len(ports) == 0:
-                print('O host {} não tem portas abertas'.format(hosts))
+        if isinstance(sub_net, dict):
+            for hosts, ports in sub_net.items():
 
-            else:
-                print('O host {} tem as seguintes portas abertas{}'.format(hosts, ports))
+                if len(ports) == 0:
+                    print('O host {} não tem portas abertas'.format(hosts))
+
+                else:
+                    print('O host {} tem as seguintes portas abertas{}'.format(hosts, ports))
+
+        else:
+
+            for host in sub_net:
+                print(f'O host {host} está ativo')
 
 
     def opcao6(self, msg1):
