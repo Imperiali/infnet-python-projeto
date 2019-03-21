@@ -228,16 +228,25 @@ class Server:
         def verifica_portas(host):
 
             nm = nmap.PortScanner()
+            port = []
 
-            nm.scan(host)
-            print(nm[host].hostname())
-            port =[]
+            try:
+                nm.scan(host)
+                print('verifica_portas',nm[host].hostname())
 
-            print('nmhost')
-            pprint.pprint(nm[host])
-            for proto in nm[host]['tcp']:
 
-                port.append(proto)
+                print('nmhost')
+                pprint.pprint(nm[host])
+
+
+
+                for proto in nm[host]['tcp']:
+
+
+                    port.append(proto)
+            except:
+
+                print('Esse host não tem porta aberta')
             return port
 
         final = verifica_hosts(ip)
@@ -247,7 +256,8 @@ class Server:
         if rick['portas']:
             for ip in final:
                 subredes[ip] = verifica_portas(ip)
-
+                print('subrede parcial')
+                pprint.pprint(subredes)
             print('subrede',subredes)
             self.envia_infos(subredes)
         else:

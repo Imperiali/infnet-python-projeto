@@ -201,8 +201,15 @@ class Client:
         sub_net = pickle.loads(recv)
 
         print("O teste será feito na sub rede: ", info)
-        print('\n Os host válidos e suas portas abertas são:')
-        pprint.pprint(sub_net)
+
+        for hosts, ports in sub_net.items():
+
+            if len(ports) == 0:
+                print('O host {} não tem portas abertas'.format(hosts))
+
+            else:
+                print('O host {} tem as seguintes portas abertas{}'.format(hosts, ports))
+
 
     def opcao6(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
