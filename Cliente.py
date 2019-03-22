@@ -101,7 +101,7 @@ class Client:
         lista = pickle.loads(recv)
 
         print('%CPU:', lista['cpu_ram'][0])
-        print('%MEM:', lista['cpu_ram'][1])
+        print('%MEM:', round(lista['cpu_ram'][1]*100))
         # self.formatar_cpu_mem(lista['cpu_ram'])
 
         load = lista['cpu_info']
