@@ -1,8 +1,10 @@
+#Membros:
+#Lucas Lange Barrozo
+#Igor Imperiali
 import pickle
 import psutil
 import socket
 import time
-import pprint
 
 
 msgInicial = ("\n ██▓███   ██▀███   ▒█████   ▄▄▄██▀▀▀▓█████▄▄▄█████▓ ▒█████     ▓█████▄ ▓█████     ▄▄▄▄    ██▓     ▒█████   ▄████▄   ▒█████  "
@@ -99,7 +101,7 @@ class Client:
         lista = pickle.loads(recv)
 
         print('%CPU:', lista['cpu_ram'][0])
-        print('%MEM:', lista['cpu_ram'][1])
+        print('%MEM:', round(lista['cpu_ram'][1]*100))
         # self.formatar_cpu_mem(lista['cpu_ram'])
 
         load = lista['cpu_info']
@@ -168,7 +170,7 @@ class Client:
 
     def opcao5(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
-        ip_complete = input('Digite o Ip para verificar as portas: ')
+        ip_complete = input('Digite o Ip para verificar a sub-rede: ')
 
         portasInput = input('Deseja verificar as portas?[S/n]')
 
@@ -201,8 +203,22 @@ class Client:
         sub_net = pickle.loads(recv)
 
         print("O teste será feito na sub rede: ", info)
-        print('\n Os host válidos e suas portas abertas são:')
-        pprint.pprint(sub_net)
+
+
+        if isinstance(sub_net, dict):
+            for hosts, ports in sub_net.items():
+
+                if len(ports) == 0:
+                    print('O host {} não tem portas abertas'.format(hosts))
+
+                else:
+                    print('O host {} tem as seguintes portas abertas{}'.format(hosts, ports))
+
+        else:
+
+            for host in sub_net:
+                print(f'O host {host} está ativo')
+
 
     def opcao6(self, msg1):
         self.socket_client.send(msg1.encode('utf-8'))
