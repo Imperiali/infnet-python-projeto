@@ -162,7 +162,7 @@ class Client:
             if key.startswith('Ethernet'):
                 ethernet.append(key)
 
-        ip = dic_redes[ethernet[1]][1].address
+        ip = dic_redes[ethernet[0]][1].address
         netmask = dic_redes[ethernet[0]][1].netmask
         mac = dic_redes[ethernet[0]][0].address
         print(ip, '      ', netmask, '              ', mac)
